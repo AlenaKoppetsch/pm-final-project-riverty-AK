@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riverty Card: decline reason and retry hint (prototype)</title>
+<style>
+:root{
+  --text-strong:#000;--text:#282828;--text-soft:#686868;--inverse:#fff;
+  --bg:#F3F1F0;--surface:#fff;--bg-soft:#E7E4E2;--brand:#527A42;--brand-soft:#E5EBE3;
+  --border:#C9C9C9;--border-soft:#E7E4E2;--focus:#0071E3;
+  --err:#B00C15;--err-soft:#FEF6F6;--ok:#298535;--ok-soft:#F7FDF8;--warn:#FF7429;--warn-soft:#FEF9F5;
+  --serif:"GT Ultra Median",Georgia,"Times New Roman",serif;
+  --sans:"SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 var(--sans)}
+h1,h2,h3{font-family:var(--serif);font-weight:300;color:var(--text-strong);margin:0}
+header{padding:20px 24px 8px}
+header h1{font-size:28px;letter-spacing:-.5px}
+.banner{display:inline-block;margin-top:8px;padding:4px 10px;background:var(--warn-soft);border:1px solid var(--warn);font-size:13px}
+.layout{display:grid;grid-template-columns:400px 1fr;gap:24px;padding:16px 24px 40px;align-items:start}
+@media(max-width:940px){.layout{grid-template-columns:1fr}}
+.phone-col{display:flex;flex-direction:column;align-items:center;gap:8px;position:sticky;top:12px}
+@media(max-width:940px){.phone-col{position:static}}
+.phone{width:340px;height:660px;background:#111;border-radius:36px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.screen{width:100%;height:100%;border-radius:28px;overflow:hidden;position:relative;background:var(--bg)}
+.view{position:absolute;inset:0;overflow-y:auto;display:none;flex-direction:column}
+.view.on{display:flex}
+/* lock screen */
+#v-lock{background:#2d3a28;color:#fff;padding:36px 14px 16px}
+.lock-time{font-size:64px;font-weight:200;text-align:center;line-height:1;margin-top:8px}
+.lock-date{text-align:center;opacity:.85;margin:6px 0 22px}
+.notifs{display:flex;flex-direction:column;gap:8px}
+.notif{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;background:rgba(243,241,240,.96);color:var(--text);border-radius:14px;padding:10px 12px}
+.notif:focus-visible{outline:3px solid var(--focus)}
+.n-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:4px}
+.app{display:flex;align-items:center;gap:6px}
+.appicon{display:inline-block;width:16px;height:16px;background:var(--brand);color:#fff;font:700 10px/16px var(--sans);text-align:center;font-style:normal}
+.n-title{font-weight:600;font-size:15px}
+.n-reason,.n-step{font-size:14px}
+.n-step{font-weight:600;margin-top:2px}
+.empty{text-align:center;opacity:.7;margin-top:30px;font-size:14px}
+.hint{margin-top:auto;text-align:center;font-size:12px;opacity:.7;padding-top:12px}
+/* detail + success */
+.appbar{display:flex;align-items:center;gap:10px;padding:34px 16px 12px;background:var(--surface);border-bottom:1px solid var(--border-soft)}
+.appbar b{font-family:var(--serif);font-weight:300;font-size:20px}
+.back{all:unset;cursor:pointer;font-size:22px;padding:0 6px}
+.back:focus-visible{outline:3px solid var(--focus)}
+.body{padding:20px 16px;display:flex;flex-direction:column;gap:16px;flex:1}
+.card{background:var(--surface);padding:16px;border:1px solid var(--border-soft)}
+.amount{font-family:var(--serif);font-size:36px;font-weight:300;color:var(--text-strong);letter-spacing:-.5px}
+.row{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.row span:first-child{color:var(--text-soft)}
+.label{font-size:12px;color:var(--text-soft);margin-bottom:4px}
+.badge{display:inline-block;background:var(--err-soft);color:var(--err);border:1px solid var(--err);font-size:12px;padding:1px 8px;margin-bottom:8px}
+.step{background:var(--brand-soft);border:2px solid var(--brand);padding:14px}
+.step .label{color:var(--brand)}
+.step b{font-size:17px}
+.btn{all:unset;box-sizing:border-box;display:block;width:100%;text-align:center;padding:14px;text-transform:uppercase;font:500 15px var(--sans);letter-spacing:.3px;cursor:pointer}
+.btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn.primary{background:var(--text);color:#fff}
+.btn.secondary{background:var(--surface);color:var(--text);border:1px solid var(--text)}
+.proto{border:1px dashed var(--text-soft);padding:10px;font-size:12px;color:var(--text-soft)}
+.proto .btn{margin-top:8px}
+.check{width:72px;height:72px;margin:24px auto 0;display:block}
+.center{text-align:center}
+.fine{font-size:12px;color:var(--text-soft)}
+/* control panel */
+.panel{display:flex;flex-direction:column;gap:16px}
+.box{background:var(--surface);border:1px solid var(--border-soft);padding:16px}
+.box h2{font-size:22px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:block;font-size:13px;margin-bottom:3px}
+select,input[type=number]{width:100%;padding:10px;border:1px solid var(--border);background:#fff;font:inherit;border-radius:0}
+select:focus,input:focus{outline:none;border-color:var(--focus)}
+.checks{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0}
+.checks label{display:flex;gap:6px;align-items:center;margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions .btn{width:auto;padding:11px 16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{background:var(--bg);padding:10px}
+.kpi b{display:block;font-family:var(--serif);font-weight:300;font-size:26px;color:var(--text-strong)}
+.kpi span{font-size:12px;color:var(--text-soft)}
+.msg{margin-top:10px;font-size:13px;padding:8px 10px;background:var(--bg)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border-soft);white-space:nowrap}
+th{background:var(--bg);font-weight:600}
+.pass{color:var(--ok);font-weight:600}.fail{color:var(--err);font-weight:600}
+.small{font-size:12.5px;color:var(--text-soft)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Riverty Card declined: reason and retry hint</h1>
+  <div class="banner">Prototype. Fictional sample data only. No network, no real push, no saved data.</div>
+</header>
+
+<main class="layout">
+  <section class="phone-col" aria-label="Phone prototype">
+    <div class="phone"><div class="screen">
+
+      <!-- Screen 1: lock-screen notification -->
+      <div class="view on" id="v-lock">
+        <div class="lock-time" id="lockTime">14:32</div>
+        <div class="lock-date">Wednesday, 11 November</div>
+        <div class="notifs" id="notifs"></div>
+        <div class="hint" id="lockHint">Tap a notification to open it</div>
+      </div>
+
+      <!-- Screen 2: decline detail -->
+      <div class="view" id="v-detail">
+        <div class="appbar"><button class="back" id="back1" aria-label="Back">←</button><b>Riverty</b></div>
+        <div class="body">
+          <div class="card">
+            <span class="badge">Riverty Card declined</span>
+            <div class="amount" id="dAmount"></div>
+            <div class="row"><span>Merchant</span><span id="dMerchant"></span></div>
+            <div class="row"><span>Time</span><span id="dTime"></span></div>
+          </div>
+          <div class="card">
+            <div class="label">What happened</div>
+            <div id="dReason"></div>
+          </div>
+          <div class="step">
+            <div class="label">Your next step</div>
+            <b id="dStep"></b>
+          </div>
+          <div class="proto">
+            Prototype-only control
+            <button class="btn secondary" id="retryBtn">Simulate retry at terminal</button>
+          </div>
+          <div class="fine center" style="margin-top:auto">Fictional sample data</div>
+        </div>
+      </div>
+
+      <!-- Screen 3: retry confirmation -->
+      <div class="view" id="v-success">
+        <div class="appbar"><b>Riverty</b></div>
+        <div class="body">
+          <svg class="check" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="34" fill="#F7FDF8" stroke="#298535" stroke-width="2"/><path d="M21 37l10 10 20-22" fill="none" stroke="#298535" stroke-width="4" stroke-linecap="square"/></svg>
+          <h2 class="center" style="font-size:28px">Payment went through</h2>
+          <div class="card">
+            <div class="row"><span>Merchant</span><span id="sMerchant"></span></div>
+            <div class="row"><span>Amount</span><span id="sAmount"></span></div>
+            <div class="row"><span>Time</span><span id="sTime"></span></div>
+          </div>
+          <div class="center">Paid with your Riverty Card</div>
+          <button class="btn primary" id="doneBtn" style="margin-top:auto">Done</button>
+        </div>
+      </div>
+
+    </div></div>
+    <div class="small" id="phoneCaption">Screen 1: lock screen</div>
+  </section>
+
+  <section class="panel">
+    <div class="box">
+      <h2>Simulate a decline</h2>
+      <div class="grid">
+        <div><label for="case">Decline code (fictional)</label><select id="case"></select></div>
+        <div><label for="merchant">Merchant (fictional)</label>
+          <select id="merchant"><option>Demo Supermarket</option><option>Sample Pharmacy</option><option>Example Bakery</option></select></div>
+        <div><label for="amount">Amount (EUR)</label><input type="number" id="amount" value="42.30" min="0.01" step="0.01"></div>
+        <div><label for="channel">Channel</label>
+          <select id="channel"><option value="instore">In store</option><option value="online">Online</option></select></div>
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="push" checked> Push notifications on</label>
+        <label><input type="checkbox" id="late"> Push arrives late (T-108)</label>
+        <label><input type="checkbox" id="pre"> Retry succeeds before notice is sent</label>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="trigger">Trigger decline</button>
+        <button class="btn secondary" id="wait">Wait 3 min</button>
+        <button class="btn secondary" id="laterBtn">Skip ahead 3 days and log a Riverty purchase</button>
+        <button class="btn secondary" id="reset">Reset</button>
+      </div>
+      <div class="small" style="margin-top:10px">Simulated time: <b id="clockNow"></b>, day <b id="dayNow">0</b></div>
+      <div class="msg" id="msg">Pick a code and press “Trigger decline”.</div>
+    </div>
+
+    <div class="box">
+      <h2>Primary metric and checks</h2>
+      <div class="kpis">
+        <div class="kpi"><b id="k1">0%</b><span>In-store declines followed by a Riverty purchase within 7 days</span></div>
+        <div class="kpi"><b id="k2">0</b><span>In-store declines (denominator, incl. not notified)</span></div>
+        <div class="kpi"><b id="k3">0</b><span>Recovered (numerator)</span></div>
+        <div class="kpi"><b id="k4">–</b><span>Notices delivered within 5 s (target ≥ 95%)</span></div>
+        <div class="kpi"><b id="k5">0</b><span>Online declines (logged separately, excluded)</span></div>
+      </div>
+      <p class="small">Baseline is not known yet. The target is +15 points over the baseline measured in the first weeks.</p>
+    </div>
+
+    <div class="box">
+      <h2>Decline log</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>#</th><th>Day / time</th><th>Merchant</th><th>Code</th><th>Reason class</th><th>Notified</th><th>Delivery</th><th>Shown text</th><th>Recovered ≤ 7 d</th></tr></thead>
+        <tbody id="logBody"><tr><td colspan="9" class="small">No declines yet.</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <div class="box">
+      <h2>Scripted accuracy and safety check</h2>
+      <p class="small">Runs the 12 scripted cases (9 mapped, 1 unmapped, 1 fraud, 1 credit). Checks the expected step, copy naming the Riverty Card, at most 120 characters, and no cause or promise in fallback text.</p>
+      <div class="actions"><button class="btn secondary" id="runEval">Run 12 scripted cases</button></div>
+      <div class="msg" id="evalSummary" hidden></div>
+      <div class="tablewrap"><table id="evalTable" hidden>
+        <thead><tr><th>Code</th><th>Notice text</th><th>Chars</th><th>Result</th></tr></thead>
+        <tbody id="evalBody"></tbody>
+      </table></div>
+      <p class="small">All strings are placeholder copy in English. Risk and legal approve the final German strings before release.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var pad = function(n){ return String(n).padStart(2,"0"); };
+var hm  = function(s){ return pad(Math.floor(s/3600)%24)+":"+pad(Math.floor(s/60)%60); };
+var hms = function(s){ return hm(s)+":"+pad(s%60); };
+var eur = function(n){ return "€"+Number(n).toFixed(2); };
+
+/* ---------- Closed lists (hardcoded, fictional) ---------- */
+var STEPS = {
+  retry:"Try again.",
+  pin:"Enter your PIN.",
+  limit:"Check your limit in the app.",
+  other:"Pay another way."
+};
+var FALLBACK = {
+  reason:"Your Riverty Card payment was declined.",
+  step:"Try again or pay another way."
+};
+var MAP = {
+  "LIMIT_LOW":{reason:"Your Riverty Card’s available limit is too low.",step:"limit"},
+  "AMOUNT_OVER_PER_PAYMENT":{reason:"This amount is above your Riverty Card’s per-payment limit.",step:"limit"},
+  "PIN_REQUIRED":{reason:"Your Riverty Card needs its PIN for this payment.",step:"pin"},
+  "PIN_WRONG":{reason:"The PIN for your Riverty Card was not accepted.",step:"pin"},
+  "CONTACTLESS_LIMIT":{reason:"Your Riverty Card’s contactless limit was reached.",step:"pin"},
+  "CARD_READ_ERROR":{reason:"The terminal could not read your Riverty Card.",step:"retry"},
+  "TERMINAL_TIMEOUT":{reason:"The terminal did not answer your Riverty Card in time.",step:"retry"},
+  "MERCHANT_NOT_SUPPORTED":{reason:"Your Riverty Card can’t be used at this type of shop.",step:"other"},
+  "CURRENCY_NOT_SUPPORTED":{reason:"Your Riverty Card can’t pay in this currency.",step:"other"}
+};
+var FLAGGED = { "F-17":"fraud", "C-42":"credit" };   /* fraud- or credit-related: fallback only */
+var CASES = [
+  ["LIMIT_LOW","Limit too low","limit"],
+  ["AMOUNT_OVER_PER_PAYMENT","Over per-payment limit","limit"],
+  ["PIN_REQUIRED","PIN required","pin"],
+  ["PIN_WRONG","PIN not accepted","pin"],
+  ["CONTACTLESS_LIMIT","Contactless limit reached","pin"],
+  ["CARD_READ_ERROR","Card read error","retry"],
+  ["TERMINAL_TIMEOUT","Terminal timeout","retry"],
+  ["MERCHANT_NOT_SUPPORTED","Shop type not supported","other"],
+  ["CURRENCY_NOT_SUPPORTED","Currency not supported","other"],
+  ["X-99","Unmapped code","fallback"],
+  ["F-17","Fraud-flagged code","fallback"],
+  ["C-42","Credit-related code","fallback"]
+];
+var MAXLEN = 120;
+
+function classify(code){
+  if (FLAGGED[code]) return FLAGGED[code];
+  if (MAP[code]) return "mapped";
+  return "unmapped";
+}
+/* Text always comes from the closed lists. Nothing is generated. */
+function compose(code, stepOverride){
+  var cls = classify(code), reason, step;
+  if (cls === "mapped"){
+    reason = MAP[code].reason;
+    step = STEPS[stepOverride || MAP[code].step];
+  } else { reason = FALLBACK.reason; step = FALLBACK.step; }
+  if ((reason+" "+step).length > MAXLEN){ reason = FALLBACK.reason; step = FALLBACK.step; }
+  return {cls:cls, reason:reason, step:step, len:(reason+" "+step).length};
+}
+
+/* ---------- State (memory only) ---------- */
+var S;
+function fresh(){ S = {clock:14*3600+32*60, day:0, log:[], notifs:[], view:"lock", open:null, success:null, nextId:1}; }
+fresh();
+var abs = function(day,t){ return day*86400+t; };
+
+/* ---------- Actions ---------- */
+function say(html){ $("msg").innerHTML = html; }
+
+function trigger(){
+  var code = $("case").value, merchant = $("merchant").value;
+  var amount = Math.max(0.01, parseFloat($("amount").value) || 0.01);
+  var channel = $("channel").value, push = $("push").checked, late = $("late").checked, pre = $("pre").checked;
+  var rec = {id:S.nextId++, day:S.day, t:S.clock, merchant:merchant, amount:amount, code:code,
+             channel:channel, cls:classify(code), notified:"", ms:null, late:false, recovered:false,
+             text:"", abs:abs(S.day,S.clock)};
+  S.log.unshift(rec);
+
+  if (channel === "online"){
+    rec.notified = "no (online, not in this release)";
+    say("Online decline: no notification in this release. Logged separately and excluded from the primary metric.");
+    return done();
+  }
+
+  /* repeat rule: same reason 3 times in 10 minutes -> step becomes "pay another way" */
+  var prior = S.log.filter(function(r){ return r!==rec && r.channel==="instore" && r.code===code && rec.abs-r.abs<=600; }).length;
+  var loop = prior >= 2;
+  var m = compose(code, loop ? "other" : null);
+  rec.text = m.reason+" "+m.step;
+  rec.cls = m.cls;
+  var note = loop && m.cls==="mapped" ? " Same reason 3 times in 10 minutes, so the step changed to “Pay another way.”" : "";
+
+  if (pre){
+    rec.notified = "suppressed (paid first)"; rec.recovered = true; rec.via = "retry";
+    S.notifs.push({id:rec.id, type:"success", merchant:merchant, amount:amount, time:S.clock+8});
+    say("Successful payment was logged before the decline notice. Decline notice suppressed, confirmation sent."); return done();
+  }
+  if (!push){
+    rec.notified = "no (push off)";
+    say("Push is off. Nothing shown. Logged as “not notified” and kept in the metric denominator."+note); return done();
+  }
+
+  rec.ms = late ? 90000+Math.round(Math.random()*20000) : 900+Math.round(Math.random()*3700);
+  rec.late = rec.ms > 5000;
+
+  /* a late decline notice never overwrites a later success */
+  var laterSuccess = S.notifs.some(function(n){ return n.type==="success" && n.merchant===merchant; });
+  if (rec.late && laterSuccess){
+    rec.notified = "yes, but not shown (success already shown)";
+    say("Late notice. A success for this merchant is already shown, so the late decline notice is not shown. Flagged in the delivery log."); return done();
+  }
+
+  var existing = S.notifs.filter(function(n){ return n.type==="decline" && n.merchant===merchant && rec.abs-n.lastAbs<=120; })[0];
+  if (existing){
+    existing.reason = m.reason; existing.step = m.step; existing.time = S.clock; existing.lastAbs = rec.abs;
+    existing.amount = amount; existing.recIds.push(rec.id);
+    rec.notified = "merged (one notice, updated, no 2nd alert)";
+    say("Two declines at the same merchant within 2 minutes: one notification, updated with the latest reason."+note);
+  } else {
+    S.notifs.push({id:rec.id, type:"decline", recIds:[rec.id], merchant:merchant, amount:amount, time:S.clock,
+                   lastAbs:rec.abs, reason:m.reason, step:m.step});
+    rec.notified = "yes";
+    say("Notice sent ("+m.len+" of "+MAXLEN+" characters). Tap it on the phone."+(rec.late ? " Delivered late: shows the original time and is flagged in the log." : "")+note);
+  }
+  done();
+}
+function done(){ S.clock += 20; S.view = "lock"; render(); }
+
+function openNotif(id){
+  var n = S.notifs.filter(function(x){ return x.id===id; })[0];
+  if (!n) return;
+  if (n.type === "success"){
+    S.notifs = S.notifs.filter(function(x){ return x!==n; });
+    S.success = {merchant:n.merchant, amount:n.amount, time:n.time}; S.view = "success";
+  } else { S.open = n; S.view = "detail"; }
+  render();
+}
+function retry(){
+  var n = S.open; if (!n) return;
+  n.recIds.forEach(function(id){
+    var r = S.log.filter(function(x){ return x.id===id; })[0];
+    if (r){ r.recovered = true; r.via = "retry"; }
+  });
+  S.clock += 15;
+  S.notifs = S.notifs.filter(function(x){ return x!==n; });
+  S.success = {merchant:n.merchant, amount:n.amount, time:S.clock};
+  S.open = null; S.view = "success"; render();
+}
+function laterPurchase(){
+  S.day += 3;
+  var c = 0;
+  S.log.forEach(function(r){
+    if (r.channel==="instore" && !r.recovered && S.day - r.day <= 7){ r.recovered = true; r.via = "later"; c++; }
+  });
+  say("Skipped ahead 3 days (now day "+S.day+"). A successful Riverty purchase was logged: "+c+" open decline(s) within 7 days counted as recovered.");
+  render();
+}
+
+/* ---------- Rendering ---------- */
+function show(view){
+  ["lock","detail","success"].forEach(function(v){ $("v-"+v).classList.toggle("on", v===view); });
+  $("phoneCaption").textContent = {lock:"Screen 1: lock-screen notification", detail:"Screen 2: decline detail", success:"Screen 3: retry confirmation"}[view];
+}
+function render(){
+  $("clockNow").textContent = hms(S.clock); $("dayNow").textContent = S.day;
+  $("lockTime").textContent = hm(S.clock);
+
+  var box = $("notifs"); box.innerHTML = "";
+  S.notifs.forEach(function(n){
+    var b = document.createElement("button"); b.className = "notif"; b.type = "button";
+    var title = n.type==="decline" ? "Riverty Card declined" : "Payment went through";
+    var l1 = n.type==="decline" ? n.reason : n.merchant+" · "+eur(n.amount);
+    var l2 = n.type==="decline" ? n.step : "Paid with your Riverty Card";
+    b.innerHTML = '<div class="n-top"><span class="app"><i class="appicon">R</i>Riverty</span><span>'+hm(n.time)+'</span></div>'+
+      '<div class="n-title">'+title+'</div><div class="n-reason">'+l1+'</div><div class="n-step">'+l2+'</div>';
+    b.addEventListener("click", function(){ openNotif(n.id); });
+    box.appendChild(b);
+  });
+  if (!S.notifs.length){ box.innerHTML = '<div class="empty">No notifications</div>'; }
+  $("lockHint").hidden = !S.notifs.length;
+
+  if (S.open){
+    var n = S.open;
+    $("dAmount").textContent = eur(n.amount); $("dMerchant").textContent = n.merchant;
+    $("dTime").textContent = hm(n.time); $("dReason").textContent = n.reason; $("dStep").textContent = n.step;
+  }
+  if (S.success){
+    $("sMerchant").textContent = S.success.merchant; $("sAmount").textContent = eur(S.success.amount);
+    $("sTime").textContent = hm(S.success.time);
+  }
+  show(S.view);
+  renderLog(); renderKpis();
+}
+function renderLog(){
+  var body = $("logBody");
+  if (!S.log.length){ body.innerHTML = '<tr><td colspan="9" class="small">No declines yet.</td></tr>'; return; }
+  body.innerHTML = S.log.map(function(r){
+    var rc = r.channel==="online" ? "online (separate)" : r.cls;
+    var del = r.ms==null ? "–" : (r.ms/1000).toFixed(1)+" s"+(r.late ? " LATE" : (r.ms<=5000?" ok":""));
+    var rec = r.channel==="online" ? "excluded" : (r.recovered ? "yes ("+(r.via==="later"?"later purchase":"retry")+")" : "no");
+    return "<tr><td>"+r.id+"</td><td>D"+r.day+" "+hms(r.t)+"</td><td>"+r.merchant+"</td><td>"+r.code+"</td><td>"+rc+
+      "</td><td>"+r.notified+"</td><td>"+del+"</td><td>"+(r.text||"–")+"</td><td>"+rec+"</td></tr>";
+  }).join("");
+}
+function renderKpis(){
+  var ins = S.log.filter(function(r){ return r.channel==="instore"; });
+  var rec = ins.filter(function(r){ return r.recovered; }).length;
+  $("k1").textContent = ins.length ? Math.round(rec/ins.length*100)+"%" : "0%";
+  $("k2").textContent = ins.length; $("k3").textContent = rec;
+  $("k5").textContent = S.log.length - ins.length;
+  var del = ins.filter(function(r){ return r.ms!=null; });
+  $("k4").textContent = del.length ? Math.round(del.filter(function(r){ return r.ms<=5000; }).length/del.length*100)+"%" : "–";
+}
+
+/* ---------- Scripted check (12 cases) ---------- */
+var BANNED = /fraud|credit|score|increas|approv|refund|guarantee/i;
+function runEval(){
+  var pass = 0;
+  $("evalBody").innerHTML = CASES.map(function(c){
+    var m = compose(c[0]), text = m.reason+" "+m.step;
+    var expectStep = c[2]==="fallback" ? FALLBACK.step : STEPS[c[2]];
+    var ok = m.step===expectStep && /Riverty Card/.test(m.reason) && m.len<=MAXLEN && !BANNED.test(text) &&
+             (c[2]!=="fallback" || m.reason===FALLBACK.reason);
+    if (ok) pass++;
+    return "<tr><td>"+c[0]+"</td><td>"+text+"</td><td>"+m.len+"</td><td class='"+(ok?"pass":"fail")+"'>"+(ok?"PASS":"FAIL")+"</td></tr>";
+  }).join("");
+  $("evalTable").hidden = false;
+  var s = $("evalSummary"); s.hidden = false;
+  s.textContent = pass+" of "+CASES.length+" scripted cases pass. Target: 100% accuracy and 0 unsafe notices.";
+}
+
+/* ---------- Wire up ---------- */
+$("case").innerHTML = CASES.map(function(c){ return '<option value="'+c[0]+'">'+c[1]+" ("+c[0]+")</option>"; }).join("");
+$("trigger").addEventListener("click", trigger);
+$("wait").addEventListener("click", function(){ S.clock += 180; say("Waited 3 minutes. Simulated time: "+hms(S.clock)+"."); render(); });
+$("laterBtn").addEventListener("click", laterPurchase);
+$("reset").addEventListener("click", function(){ fresh(); say("Reset. Pick a code and press “Trigger decline”."); render(); });
+$("back1").addEventListener("click", function(){ S.view = "lock"; render(); });
+$("retryBtn").addEventListener("click", retry);
+$("doneBtn").addEventListener("click", function(){ S.view = "lock"; render(); });
+$("runEval").addEventListener("click", runEval);
+render();
+</script>
+</body>
+</html>
