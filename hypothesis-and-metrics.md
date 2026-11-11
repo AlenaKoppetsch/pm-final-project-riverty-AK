@@ -1,0 +1,40 @@
+# Hypothesis & Success Metrics (Module 3)
+
+## Pre-work · Hypothesis check
+- **Role , who you are solving for (from M2):** Alexandra, the heavy BNPL user who wants Riverty in the shop. Goal: Use pay later at the supermarket and other shops, without a new thing to check before payday (N-04, N-02). Strategy: Riverty extends from a checkout-only pay later option into a card the consumer carries, so heavy BNPL users can pay later anywhere they shop, and Riverty keeps the transaction and the relationship that would otherwise go to her bank card.
+- **Goal , what this user is ultimately trying to achieve:** Use pay later at the supermarket and other shops, without a new thing to check before payday (N-04, N-02).
+- **Friction / moment of misery , the specific pain blocking their goal:** She gets to the till and the card fails. A bakery declines her with no reason shown (N-06, T-101), in public, and she goes back to her debit card that same week. 48 in-store declines were logged, and the in-store decline rate reached 8.7% in Month 4. Caveat: N-06 is a participant with no stated age or BNPL profile, so combining her with N-01/N-02 is a composite.
+- **Current workaround , the external tool or manual process they rely on (M2):** Fall back to the debit card at the till, Pay again with another card after a late notification
+- **Problem Hook , your one-sentence framing of the business crisis (M1):** Riverty is losing the people who use it most, because the moment Lena wants to decide-then-pay in a shop or at a non-partner merchant, Riverty isn’t there and Klarna or PayPal gets the sale and the relationship, which, left alone, erodes the consumer pull that makes Riverty worth a merchant’s checkout.
+- **Value Proposition , the outcome your initiative promised to deliver (M1):** For Lena and users like her, who shop on their phones, use BNPL on most non-trivial purchases, and want money to leave their account only after they’ve decided to keep the item,
+
+## Read the evidence in your case
+- **Where does your case say people stall or leave? Does that match the friction you wrote in Module 2?:** First purchase to habit (27.7%). Of 350 people who bought once, only 253 made three or more purchases in their activation month. The highest rate of loss is here, which fits N-03 and N-06: the card doesn’t become the one she reaches for.
+- **What got better or worse in the case, and does that support the workaround your persona uses?:** Overall: the picture is growth that stalled in Month 4, with decline rates and cohort retention moving the wrong way
+Better:
+In-store declines fell sharply from Month 1 to Month 3
+Spend per active card rose to EUR 233
+Instalment use crept up
+Worse:
+Each cohort retains fewer people than the one before it by month 1.
+Retention keeps decaying.
+Does this support Alexandra’s workaround?
+
+Directionally yes, but it doesn’t prove it. The workaround is a fallback to the debit card after an unexplained decline. Riverty never sees that payment, so the data can’t show it directly. The only direct evidence is still N-06, one participant.
+- **Which user in the case is carrying the pain, and is that the person your Module 2 persona describes?:** The data shows who uses the card in shops, but it has no decline rates by segment, so it can’t show who actually feels the declines. What it does show is that the person most likely carrying the in-store pain is not quite Alexandra.
+She matches the high-value segment. Heavy users have the best activation, highest spend (EUR 320.88 a month) and most purchases.
+She doesn’t match the in-store behavior. Heavy users have the lowest in-store share of any segment (12.1%), and the 25-34 age band has the lowest of any age band (14.8%). Alexandra is the user who wants shop use but does it least.
+Her goal quote comes from a different person. The supermarket wish (N-04) is an 18-24 heavy user. N-01 and N-02, the 25-34 users who give her profile, talk about online use and app fatigue, not shops.
+The bakery moment has no profile. N-06 states no age or BNPL profile, so we don’t know who it happened to.
+The habit-reversion pain looks more like N-03. That’s a regular user, 35-44, who taps the bank card by reflex. Regular users are the largest in-store group in the data, so my earlier Persona 2 may carry the in-store pain better than Alexandra.
+
+## Step 2 · Craft your hypothesis
+- **Qualitative evidence (from M2) , quote the specific friction / moment of misery for your persona:** N-06: “The card was declined at a bakery and the app did not say why. I went back to my debit card the same week.” Backed by T-101 (in-store decline, no reason shown) and N-03 (“In a shop I tap my bank card without thinking”).
+- **Quantitative evidence (from M3) , name the metric or data point that confirms the pain; cite the number:** The in-store decline rate was 8.7% in Month 4, against 3.5% overall, about 2.5 times higher (206 in-store attempts, so roughly 18 declines). 48 in-store declines were logged across the pilot. The Month 3 cohort kept only 64.0% of its cards active in month 1, against 69.2% for the Month 2 cohort, and that month is when declines rose.
+- **Persona , role, goal, and the friction you confirmed in the reconciliation steps:** Alexandra, an active BNPL user (heavy or regular) who already pays later online and wants it in shops without another thing to check before payday (N-04, N-02). The confirmed friction is an unexplained decline at the till. Composite of N-01, N-02, N-03, N-04 and N-06.
+- **Problem you are solving , one sentence describing the specific friction this initiative removes:** When an in-store payment is declined, Alexandra gets no reason and no way to recover, so she pays with her debit card and stops trying Riverty in shops.
+- **Strategic outcome , what behaviour change do you expect, and how does it map to retention / revenue / churn?:** After a decline she understands the cause, retries on Riverty, and keeps the in-store habit. Retention: more cards stay active past month 1 (64–69% now). Revenue: more in-store purchases (17.0% of purchases now) on a card averaging EUR 233 a month. Churn: fewer silent exits to the debit card. Churn itself can’t be measured in four months, so this is an expected effect, not an observed one.
+- **Primary success metric (initiative signal) , the leading indicator that tells you the gap is closing:** Share of in-store declines followed by a successful Riverty purchase within 7 days. Baseline is not in the data pack; it has to be measured in the first weeks.
+- **Guardrail metric (product signal) , the metric that must NOT drop; it protects your existing base:** Heavy-user purchases per active month must stay at or above 5.82. Also watch that the overall decline rate does not exceed its Month 4 high of 3.5%.
+- **Decision window , how much time or data before you scale, pivot, or kill? minimum threshold to proceed?:** 90 days, which lets one cohort reach month 2, with at least 100 in-store declines logged. Scale if recovery improves 15 or more points over baseline and the guardrail holds. Pivot if it improves under 5 points but the in-store decline rate is falling. Kill if there is no movement after 90 days and 100 declines.
+- **Draft your full hypothesis sentence , one to three sentences; quote the metric, name the persona, name the outcome:** Based on N-06’s account of an unexplained bakery decline that sent her back to her debit card within the week, and an in-store decline rate of 8.7% in Month 4 (against 3.5% overall), I believe that showing a clear reason and retry hint on in-store declines for Alexandra, the active BNPL user who wants pay later in shops, will result in her retrying on Riverty instead of reverting to her debit card, as measured by a 15-point increase in the share of in-store declines followed by a successful Riverty purchase within 7 days. I will protect heavy-user purchases per active month (currently 5.82) and will make a go/no-go decision after 90 days or 100 logged in-store declines, whichever comes later.
